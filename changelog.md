@@ -1,5 +1,28 @@
 # Changelog
 
+### 2026-08-15 17:26
+- Changed: Tightened the site's Tufte fidelity and minimalism (formatting only,
+  no content added).
+  - Fixed: sidenotes rendered a margin note with no in-text reference. The
+    remark plugin now emits a `<span class="sidenote-number">` before each
+    sidenote, so the superscript number in the text and the number in the
+    margin increment from the same counter. Margin notes stay unnumbered.
+  - Typography: body set to 1.15rem/1.55 (ET Book runs small for its point
+    size); measure narrowed 34rem → 31rem for a ~62–68 character line;
+    old-style figures enabled site-wide.
+  - Ragged right: `text-align: justify` + `hyphens: auto` replaced with
+    left-aligned text. Browser justification opened rivers at this measure.
+  - Removed non-data ink: the filled/rounded code panel (and Shiki's inline
+    background), the dashed placeholder border, the decorative rule under
+    section headings, and the blockquote indent bar.
+  - Replaced synthesized `font-variant: small-caps` in `h3` and table headers
+    with letterspaced uppercase — ET Book has no true small-caps cut.
+  - Accessibility: `--faint` #9a9a92 → #75756c, lifting contrast on paper from
+    2.82:1 to 4.63:1 (was below WCAG AA for the meta lines and muted topics).
+- Why: The scaffolding was already Tufte-shaped, but the signature feature —
+  the numbered sidenote — was silently broken, and several boxes, rules, and
+  fills were adding ink without adding information.
+
 ### 2026-08-15 00:41
 - Changed: Rebuilt the site as a Tufte-inspired research notebook.
   - Added the **Intelligence Stack**: a persistent, collapsible left sidebar

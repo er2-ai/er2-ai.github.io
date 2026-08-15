@@ -30,7 +30,7 @@
   --paper: #fffff8;
   --ink: #111111;
   --muted: #555555;
-  --faint: #9a9a92;
+  --faint: #75756c;
   --hairline: #d8d8d0;
 
   --serif: 'ETBembo', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
@@ -38,7 +38,8 @@
 
   --sidebar-w: 264px;
   --gutter: 56px;
-  --measure: 34rem; /* narrow text column */
+  /* ~62–68 characters per line at the body size — Tufte's readable measure. */
+  --measure: 31rem;
   --note-w: 250px;
   --note-gap: 40px;
 }
@@ -53,9 +54,13 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--serif);
-  font-size: 1.05rem;
-  line-height: 1.6;
+  /* ET Book runs small for its point size; 1.15rem/1.55 matches the
+     optical size of Tufte's printed text. */
+  font-size: 1.15rem;
+  line-height: 1.55;
   font-kerning: normal;
+  /* Old-style figures sit within the x-height, as in the books. */
+  font-variant-numeric: oldstyle-nums;
 }
 
 ::selection {
@@ -257,8 +262,10 @@ a:hover {
 }
 .content p {
   margin: 1.25rem 0;
-  text-align: justify;
-  hyphens: auto;
+  /* Ragged right: browser justification opens rivers in a narrow measure,
+     and Tufte's own settings leave the right edge uneven. */
+  text-align: left;
+  hyphens: none;
 }
 
 .content h1,
@@ -274,9 +281,11 @@ a:hover {
   margin: 3rem 0 1.1rem;
 }
 .content h3 {
-  font-variant: small-caps;
-  letter-spacing: 0.06em;
-  font-size: 1.3rem;
+  /* `font-variant: small-caps` synthesizes poorly in ET Book; letterspaced
+     uppercase at a smaller size reads as the same tier without the fakery. */
+  text-transform: uppercase;
+  font-size: 1.02rem;
+  letter-spacing: 0.11em;
   margin: 2.4rem 0 0.9rem;
 }
 .content h4 {
@@ -285,9 +294,11 @@ a:hover {
   margin: 2rem 0 0.7rem;
 }
 
+/* Quotations: indented, no decorative bar. */
 .content blockquote {
-  margin: 1.5rem 2rem;
+  margin: 1.5rem 0 1.5rem 1.75rem;
   font-size: 0.95em;
+  color: var(--muted);
 }
 .content blockquote p {
   text-align: left;
@@ -331,14 +342,31 @@ a:hover {
   vertical-align: baseline;
   position: relative;
 }
-.sidenote {
+
+/* The in-text superscript marker, numbered in step with the margin. */
+.sidenote-number {
   counter-increment: sidenote-counter;
+  position: relative;
 }
-.sidenote::before {
-  content: counter(sidenote-counter) '\2002'; /* number + en space */
+.sidenote-number::after {
+  content: counter(sidenote-counter);
+  font-size: 0.65rem;
+  font-variant-numeric: lining-nums;
+  top: -0.4rem;
+  left: 0.08rem;
+  position: relative;
   color: var(--ink);
-  font-size: 0.85em;
-  font-style: italic;
+}
+
+/* The number repeated in the margin, tying note to marker. */
+.sidenote::before {
+  content: counter(sidenote-counter);
+  font-size: 0.68rem;
+  font-variant-numeric: lining-nums;
+  vertical-align: super;
+  line-height: 0;
+  color: var(--ink);
+  margin-right: 0.35em;
 }
 .sidenote p,
 .marginnote p {
@@ -385,8 +413,9 @@ figure.full {
 .content thead th {
   border-top: 1.4px solid var(--ink);
   border-bottom: 0.6px solid var(--ink);
-  font-variant: small-caps;
-  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  letter-spacing: 0.09em;
   font-weight: 400;
   text-align: left;
   padding: 0.45rem 0.9rem 0.45rem 0;
@@ -399,17 +428,23 @@ figure.full {
   border-bottom: 1.4px solid var(--ink);
 }
 
+/* Code: no filled panel or rounded corners — the monospace face and the
+   whitespace already separate it from prose. */
 .content pre {
-  background: #f7f7f1;
-  padding: 1rem 1.15rem;
-  margin: 1.5rem 0;
+  background: none;
+  padding: 0;
+  margin: 1.6rem 0;
   overflow-x: auto;
   font-size: 0.8rem;
   line-height: 1.5;
-  border-radius: 2px;
 }
 .content code {
   font-family: var(--mono);
+}
+/* Shiki sets an inline background on its wrapper; keep the page paper. */
+.content pre.astro-code,
+.content pre.astro-code span {
+  background: transparent !important;
 }
 .content :not(pre) > code {
   font-size: 0.82em;
@@ -538,8 +573,7 @@ h1.page-title {
 }
 
 .placeholder-box {
-  border: 1px dashed var(--hairline);
-  padding: 1.1rem 1.3rem;
+  padding: 0;
   margin: 2.2rem 0;
   font-style: italic;
   color: var(--faint);
@@ -557,13 +591,6 @@ h2.section-head {
   text-transform: uppercase;
   color: var(--muted);
   margin: 3.2rem 0 0.9rem;
-}
-h2.section-head::after {
-  content: '';
-  display: block;
-  width: 3.2rem;
-  border-top: 1px solid var(--hairline);
-  margin-top: 0.5rem;
 }
 
 .lede {
