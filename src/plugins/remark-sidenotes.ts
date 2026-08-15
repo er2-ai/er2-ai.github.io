@@ -40,11 +40,13 @@ function transformText(value: string): FragmentNode[] | null {
     }
     const isMarginNote = match[1] !== undefined || match[2] !== undefined;
     const inner = (match[1] ?? match[2] ?? match[3]) ?? '';
-    const cls = isMarginNote ? 'marginnote' : 'sidenote';
-    parts.push({
-      type: 'html',
-      value: `<span class="${cls}">${inner.trim()}</span>`,
-    });
+    // A sidenote gets a superscript number in the text that matches the
+    // number printed in the margin; a margin note is unnumbered.
+    const html = isMarginNote
+      ? `<span class="marginnote">${inner.trim()}</span>`
+      : `<span class="sidenote-number"></span>` +
+        `<span class="sidenote">${inner.trim()}</span>`;
+    parts.push({ type: 'html', value: html });
     lastIndex = match.index + match[0].length;
   }
   if (!matched) return null;
