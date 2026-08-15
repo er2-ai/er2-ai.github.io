@@ -1,0 +1,91 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../../components/Breadcrumb.astro';
+import ArticleList from '../../../components/ArticleList.astro';
+import { STACK, topicKey } from '../../../data/stack';
+
+export async function getStaticPaths() {
+  return STACK.map((section) => ({
+    params: { section: section.id },
+    props: { section },
+  }));
+}
+
+const { section } = Astro.props as { section: (typeof STACK)[number] };
+
+const articles = await getCollection('articles');
+const inSection = articles
+  .filter((a) => a.data.section === section.id)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const articlesByTopic = new Map<string, CollectionEntry<'articles'>[]>();
+for (const article of inSection) {
+  const key = topicKey(article.data.section, article.data.topic);
+  const list = articlesByTopic.get(key) ?? [];
+  list.push(article);
+  articlesByTopic.set(key, list);
+}
+---
+
+<BaseLayout title={`${section.title} — Intelligence Stack`} current={{ section: section.id }}>
+  <div class="measure">
+    <Breadcrumb crumbs={[{ label: section.title }]} />
+    <h1 class="page-title">{section.numeral}. {section.title}</h1>
+
+    <h2 class="section-head">Topics</h2>
+    <ul class="topic-list">
+      {
+        section.topics.map((topic) => {
+          const count = articlesByTopic.get(topicKey(section.id, topic.id))?.length ?? 0;
+          return (
+            <li>
+              {count > 0 ? (
+                <a href={`/stack/${section.id}/${topic.id}/`}>{topic.title}</a>
+              ) : (
+                <span class="pending">{topic.title}</span>
+              )}
+              {count > 0 && <span class="count">{count}</span>}
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <h2 class="section-head">Notes in This Section</h2>
+    {
+      inSection.length > 0 ? (
+        <ArticleList articles={inSection} />
+      ) : (
+        <p class="empty">No notes in this section yet.</p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .topic-list {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    column-count: 2;
+    column-gap: 2.5rem;
+    font-size: 0.95rem;
+    line-height: 1.9;
+  }
+  .topic-list .pending {
+    color: var(--faint);
+  }
+  .topic-list .count {
+    color: var(--faint);
+    font-size: 0.72rem;
+    margin-left: 0.4em;
+    vertical-align: super;
+  }
+  @media (max-width: 949px) {
+    .topic-list {
+      column-count: 1;
+    }
+  }
+</style>

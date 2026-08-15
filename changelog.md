@@ -1,5 +1,28 @@
 # Changelog
 
+### 2026-08-15 00:41
+- Changed: Rebuilt the site as a Tufte-inspired research notebook.
+  - Added the **Intelligence Stack**: a persistent, collapsible left sidebar
+    (`src/data/stack.ts`) mapping intelligence from Philosophy through
+    Mathematics, Physics, Computation, Hardware, Systems, Software, AI,
+    Machine Learning, Neural Networks, and on to General Intelligence and
+    Open Questions. Topics with notes become links; topics without stay muted.
+  - Added article pages (`/articles/[slug]/`) with breadcrumbs through the
+    stack, sidenotes, margin notes, KaTeX math (build-time rendered), code,
+    tables, figures, footnotes, references, and related cross-links.
+  - Added section pages (`/stack/[section]/`) and topic pages
+    (`/stack/[section]/[topic]/`).
+  - Added a sparse home page: title, placeholder description, the stack as a
+    map, recent notes, and questions under investigation.
+  - Typography: self-hosted ET Book, narrow text column, generous margins,
+    monochromatic palette. Zero client-side JavaScript (collapsible sections
+    use `<details>`; sidenotes use a custom remark plugin + CSS).
+  - Added `@astrojs/mdx`, `@astrojs/sitemap`, `@astrojs/markdown-remark`,
+    `remark-math`, `rehype-katex`, `katex`; added `WRITING.md` authoring guide.
+- Why: The site should feel like a research notebook or digital monograph —
+  an evolving map of intelligence from first principles to implementation —
+  rather than a blog or portfolio.
+
 ### 2026-08-15 00:28
 - Changed: Set up GitHub Pages deployment for the Astro site.
   - Added remote `origin` pointing to `https://github.com/er2-ai/er2-ai.github.io.git` and pushed the local history (renamed local branch `master` → `main`).

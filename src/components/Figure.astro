@@ -1,0 +1,23 @@
+---
+/**
+ * A figure with optional caption.
+ * Use inside MDX: <Figure src={img} alt="..." caption="..." full />
+ *
+ * `full` spans the text column and the margin-note column on wide screens.
+ * For images placed in src/assets/, pass an imported image:
+ *   import img from '../../assets/diagram.png'; <Figure src={img} ... />
+ */
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  full?: boolean;
+}
+
+const { src, alt, caption, full = false } = Astro.props;
+---
+
+<figure class:list={{ full }}>
+  <img src={src} alt={alt} loading="lazy" />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  articles: CollectionEntry<'articles'>[];
+}
+
+const { articles } = Astro.props;
+
+const fmt = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<ul class="article-list">
+  {
+    articles.map((article) => (
+      <li>
+        <span class="meta">
+          {fmt.format(article.data.date)}&ensp;·&ensp;
+          <span class="status">{article.data.status}</span>
+        </span>
+        <a class="title" href={`/articles/${article.id}/`}>{article.data.title}</a>
+        {article.data.description && <p class="desc">{article.data.description}</p>}
+      </li>
+    ))
+  }
+</ul>

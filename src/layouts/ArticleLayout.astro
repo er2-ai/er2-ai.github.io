@@ -1,0 +1,105 @@
+---
+/**
+ * Long-form article shell: breadcrumb through the stack, title,
+ * meta line, rendered content, references, and related notes.
+ */
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { resolvePosition } from '../content.config';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+  /** Rendered article body. */
+  content: any;
+  /** slug -> article, for resolving `related` cross-links. */
+  bySlug: Map<string, CollectionEntry<'articles'>>;
+}
+
+const { article, content: Content, bySlug } = Astro.props;
+const { section, topic } = resolvePosition(article.data.section, article.data.topic);
+
+const fmt = new Intl.DateTimeFormat('en-US', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const related = article.data.related
+  .map((slug) => bySlug.get(slug))
+  .filter((a): a is CollectionEntry<'articles'> => a !== undefined);
+---
+
+<BaseLayout
+  title={article.data.title}
+  description={article.data.description}
+  current={{ section: section.id, topic: topic.id }}
+>
+  <article class="measure">
+    <Breadcrumb
+      crumbs={[
+        { label: section.title, href: `/stack/${section.id}/` },
+        { label: topic.title, href: `/stack/${section.id}/${topic.id}/` },
+      ]}
+    />
+
+    <h1 class="page-title">{article.data.title}</h1>
+
+    {article.data.description && <p class="subtitle">{article.data.description}</p>}
+
+    <p class="meta-line">
+      {fmt.format(article.data.date)}&ensp;·&ensp;
+      <span class="status">{article.data.status}</span>&ensp;·&ensp;
+      {section.numeral}. {section.title} — {topic.title}
+    </p>
+
+    <div class="content">
+      <Content />
+    </div>
+
+    {
+      article.data.references.length > 0 && (
+        <section class="references measure">
+          <h2 class="section-head">References</h2>
+          <ol>
+            {article.data.references.map((ref) => (
+              <li>{ref}</li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
+    {
+      related.length > 0 && (
+        <section class="related measure">
+          <h2 class="section-head">Related</h2>
+          <ul class="article-list">
+            {related.map((r) => (
+              <li>
+                <a class="title" href={`/articles/${r.id}/`}>{r.data.title}</a>
+                {r.data.description && <p class="desc">{r.data.description}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <a class="back-link" href={`/stack/${section.id}/${topic.id}/`}>
+      ← Back to {topic.title}
+    </a>
+  </article>
+</BaseLayout>
+
+<style>
+  .references ol {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--muted);
+    padding-left: 1.5rem;
+  }
+  .references li {
+    margin: 0.4rem 0;
+  }
+</style>

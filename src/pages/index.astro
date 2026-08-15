@@ -1,11 +1,63 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StackMap from '../components/StackMap.astro';
+import ArticleList from '../components/ArticleList.astro';
+import { topicKey } from '../data/stack';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const articles = await getCollection('articles');
+const articlesByTopic = new Map<string, CollectionEntry<'articles'>[]>();
+for (const article of articles) {
+  const key = topicKey(article.data.section, article.data.topic);
+  const list = articlesByTopic.get(key) ?? [];
+  list.push(article);
+  articlesByTopic.set(key, list);
+}
+
+const byDate = [...articles].sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const recent = byDate.slice(0, 5);
+const questions = byDate.filter((a) => a.data.status === 'question');
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title="Intelligence">
+  <div class="measure">
+    <h1 class="page-title">Intelligence</h1>
+    <p class="lede">A website for ongoing studies and thoughts about intelligence.</p>
+    <p class="empty">A fuller description will be written here in time.</p>
+  </div>
+
+  <div class="measure">
+    <h2 class="section-head">The Intelligence Stack</h2>
+    <p class="empty">
+      A map from the most abstract questions about intelligence toward its
+      mathematical, physical, computational, and architectural implementation.
+      Topics light up as notes are written.
+    </p>
+    <StackMap articlesByTopic={articlesByTopic} />
+  </div>
+
+  <div class="measure">
+    <h2 class="section-head">Recent Notes</h2>
+    {
+      recent.length > 0 ? (
+        <ArticleList articles={recent} />
+      ) : (
+        <p class="empty">No notes yet. The notebook begins empty.</p>
+      )
+    }
+  </div>
+
+  <div class="measure">
+    <h2 class="section-head">Questions Under Investigation</h2>
+    {
+      questions.length > 0 ? (
+        <ArticleList articles={questions} />
+      ) : (
+        <p class="empty">No open questions recorded yet.</p>
+      )
+    }
+  </div>
+</BaseLayout>

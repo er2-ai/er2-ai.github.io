@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../../../components/Breadcrumb.astro';
+import ArticleList from '../../../../components/ArticleList.astro';
+import { STACK, getSection, getTopic } from '../../../../data/stack';
+
+export async function getStaticPaths() {
+  return STACK.flatMap((section) =>
+    section.topics.map((topic) => ({
+      params: { section: section.id, topic: topic.id },
+      props: { section, topic },
+    })),
+  );
+}
+
+interface Props {
+  section: NonNullable<ReturnType<typeof getSection>>;
+  topic: NonNullable<ReturnType<typeof getTopic>>;
+}
+
+const { section, topic } = Astro.props as Props;
+
+const articles = (await getCollection('articles'))
+  .filter((a) => a.data.section === section.id && a.data.topic === topic.id)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout
+  title={`${topic.title} — ${section.title}`}
+  current={{ section: section.id, topic: topic.id }}
+>
+  <div class="measure">
+    <Breadcrumb
+      crumbs={[
+        { label: section.title, href: `/stack/${section.id}/` },
+        { label: topic.title },
+      ]}
+    />
+
+    <h1 class="page-title">{topic.title}</h1>
+    <p class="meta-line">{section.numeral}. {section.title}</p>
+
+    {
+      articles.length > 0 ? (
+        <ArticleList articles={articles} />
+      ) : (
+        <p class="empty">No notes under this topic yet.</p>
+      )
+    }
+
+    <div class="placeholder-box">
+      Notes and studies on {topic.title.toLowerCase()} will appear here as
+      they are written.
+    </div>
+
+    <a class="back-link" href={`/stack/${section.id}/`}>
+      ← Back to {section.title}
+    </a>
+  </div>
+</BaseLayout>

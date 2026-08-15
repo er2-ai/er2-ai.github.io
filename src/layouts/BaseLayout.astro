@@ -1,0 +1,68 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import StackSidebar from '../components/StackSidebar.astro';
+import { topicKey } from '../data/stack';
+import '../styles/global.css';
+import 'katex/dist/katex.min.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Position in the stack currently being viewed, for sidebar highlighting. */
+  current?: { section?: string; topic?: string };
+}
+
+const { title, description, current } = Astro.props;
+
+const articles = await getCollection('articles');
+const articlesByTopic = new Map<string, CollectionEntry<'articles'>[]>();
+for (const article of articles) {
+  const key = topicKey(article.data.section, article.data.topic);
+  const list = articlesByTopic.get(key) ?? [];
+  list.push(article);
+  articlesByTopic.set(key, list);
+}
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const pageDescription = description ?? 'Notes and studies on intelligence.';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title === 'Intelligence' ? 'Intelligence' : `${title} — Intelligence`}</title>
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="Intelligence Stack">
+      <a class="site-word" href="/">Intelligence</a>
+      <span class="stack-label">The Intelligence Stack</span>
+      <div class="stack">
+        <StackSidebar current={current} articlesByTopic={articlesByTopic} />
+      </div>
+    </aside>
+
+    <details class="mobile-nav">
+      <summary>Contents</summary>
+      <a class="site-word" href="/">Intelligence</a>
+      <span class="stack-label">The Intelligence Stack</span>
+      <div class="stack">
+        <StackSidebar current={current} articlesByTopic={articlesByTopic} />
+      </div>
+    </details>
+
+    <main class="main">
+      <slot />
+    </main>
+  </body>
+</html>

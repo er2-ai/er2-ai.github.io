@@ -1,0 +1,53 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { STACK, topicKey } from '../data/stack';
+
+interface Props {
+  /** Topic key ("section/topic") -> articles under that topic. */
+  articlesByTopic: Map<string, CollectionEntry<'articles'>[]>;
+}
+
+const { articlesByTopic } = Astro.props;
+---
+
+<section class="stack-map">
+  {
+    STACK.map((section) => (
+      <div>
+        <h3>
+          <a href={`/stack/${section.id}/`} class="section-link">
+            <span class="numeral">{section.numeral}.</span>
+            {section.title}
+          </a>
+        </h3>
+        <ul>
+          {section.topics.map((topic) => {
+            const hasArticles = (articlesByTopic.get(topicKey(section.id, topic.id))?.length ?? 0) > 0;
+            return (
+              <li>
+                {hasArticles ? (
+                  <a href={`/stack/${section.id}/${topic.id}/`}>{topic.title}</a>
+                ) : (
+                  topic.title
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  .stack-map .section-link {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .stack-map .section-link:hover .numeral,
+  .stack-map .section-link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 0.5px;
+    text-underline-offset: 3px;
+  }
+</style>

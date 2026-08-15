@@ -1,0 +1,55 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { STACK, topicKey } from '../data/stack';
+
+interface Props {
+  /** Which section/topic is currently being viewed, if any. */
+  current?: { section?: string; topic?: string };
+  /** Topic key ("section/topic") -> articles under that topic. */
+  articlesByTopic: Map<string, CollectionEntry<'articles'>[]>;
+}
+
+const { current = {}, articlesByTopic } = Astro.props;
+const currentSection = current.section;
+const currentTopicKey = current.section && current.topic ? topicKey(current.section, current.topic) : null;
+---
+
+<nav aria-label="Intelligence Stack">
+  {
+    STACK.map((section, i) => {
+      const open = currentSection
+        ? section.id === currentSection
+        : i === 0;
+      return (
+        <details open={open} class:list={['stack-section', { 'section-active': section.id === currentSection }]}>
+          <summary>
+            <span class="numeral">{section.numeral}.</span>
+            <span class="title">{section.title}</span>
+          </summary>
+          <ul>
+            {section.topics.map((topic) => {
+              const key = topicKey(section.id, topic.id);
+              const hasArticles = (articlesByTopic.get(key)?.length ?? 0) > 0;
+              const isCurrent = key === currentTopicKey;
+              return (
+                <li>
+                  {hasArticles ? (
+                    <a
+                      href={`/stack/${section.id}/${topic.id}/`}
+                      aria-current={isCurrent ? 'page' : undefined}
+                      class:list={{ current: isCurrent }}
+                    >
+                      {topic.title}
+                    </a>
+                  ) : (
+                    <span class="pending">{topic.title}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      );
+    })
+  }
+</nav>
